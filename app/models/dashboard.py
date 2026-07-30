@@ -31,7 +31,7 @@ class Dashboard(Base):
     access_level = Column(String(50), default="admin")  # admin, user, readonly
     
     # Metadata
-    metadata = Column(JSON, nullable=True)
+    extra_metadata = Column(JSON, nullable=True)
     
     # Timestamps
     created_at = Column(DateTime, default=datetime.utcnow)
@@ -69,7 +69,7 @@ class Widget(Base):
     query_config = Column(JSON, nullable=True)
     
     # Metadata
-    metadata = Column(JSON, nullable=True)
+    extra_metadata = Column(JSON, nullable=True)
     
     # Timestamps
     created_at = Column(DateTime, default=datetime.utcnow)

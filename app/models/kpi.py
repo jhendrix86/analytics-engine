@@ -36,7 +36,7 @@ class KPI(Base):
     last_updated = Column(DateTime, default=datetime.utcnow)
     
     # Metadata
-    metadata = Column(JSON, nullable=True)
+    extra_metadata = Column(JSON, nullable=True)
     
     # Relationships
     goals = relationship("KPIGoal", back_populates="kpi")
@@ -65,7 +65,7 @@ class KPIGoal(Base):
     achieved_at = Column(DateTime, nullable=True)
     
     # Metadata
-    metadata = Column(JSON, nullable=True)
+    extra_metadata = Column(JSON, nullable=True)
     
     # Timestamps
     created_at = Column(DateTime, default=datetime.utcnow)

@@ -97,7 +97,7 @@ async def get_historical_metrics(
         
     except Exception as e:
         logger.error(f"Failed to get historical metrics: {e}")
-        raise HTTPException(status_code=500, detail(str(e))
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.post("/custom")
@@ -128,4 +128,4 @@ async def create_custom_metric(
         
     except Exception as e:
         logger.error(f"Failed to create custom metric: {e}")
-        raise HTTPException(status_code=500, detail(str(e))
+        raise HTTPException(status_code=500, detail=str(e))

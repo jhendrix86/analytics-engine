@@ -45,7 +45,7 @@ class Prediction(Base):
     valid_until = Column(DateTime, nullable=True)
     
     # Metadata
-    metadata = Column(JSON, nullable=True)
+    extra_metadata = Column(JSON, nullable=True)
     
     def __repr__(self):
         return f"<Prediction {self.name} - {self.prediction_type}>"
