@@ -1,0 +1,49 @@
+version: '3.8'
+
+services:
+  analytics-engine:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    container_name: analytics-engine
+    ports:
+      - "8042:8042"
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/analytics
+      - REDIS_URL=redis://redis:6379
+      - CLICKHOUSE_URL=${CLICKHOUSE_URL}
+      - DEBUG=${DEBUG:-false}
+      - GLOBAL_STATE_MANAGER_URL=http://global-state-manager:8035
+    depends_on:
+      - postgres
+      - redis
+    networks:
+      - analytics-network
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:15-alpine
+    container_name: analytics-postgres
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=analytics
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - analytics-network
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    container_name: analytics-redis
+    networks:
+      - analytics-network
+    restart: unless-stopped
+
+networks:
+  analytics-network:
+    driver: bridge
+
+volumes:
+  postgres-data:

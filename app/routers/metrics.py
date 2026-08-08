@@ -14,6 +14,14 @@ from app.database import get_db
 router = APIRouter()
 
 
+class CreateCustomMetricRequest(BaseModel):
+    """Request to create a custom metric"""
+    name: str
+    metric_type: str
+    value: int
+    unit: Optional[str] = None
+
+
 @router.get("/real-time")
 async def get_real_time_metrics(
     db: AsyncSession = Depends(get_db)
@@ -102,24 +110,21 @@ async def get_historical_metrics(
 
 @router.post("/custom")
 async def create_custom_metric(
-    name: str,
-    metric_type: str,
-    value: int,
-    unit: Optional[str] = None,
+    request: CreateCustomMetricRequest,
     db: AsyncSession = Depends(get_db)
 ):
     """Create custom metric"""
     try:
-        logger.info(f"Creating custom metric: {name}")
-        
+        logger.info(f"Creating custom metric: {request.name}")
+
         # In production, this would save to database
         # For now, return a mock response
         metric = {
             "id": "metric_123",
-            "name": name,
-            "metric_type": metric_type,
-            "value": value,
-            "unit": unit,
+            "name": request.name,
+            "metric_type": request.metric_type,
+            "value": request.value,
+            "unit": request.unit,
             "created_at": datetime.utcnow().isoformat()
         }
         
