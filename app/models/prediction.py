@@ -9,6 +9,7 @@ import uuid
 import enum
 
 from app.database import Base
+from app.models.tenant_base import TenantBase
 
 
 class PredictionType(str, enum.Enum):
@@ -19,7 +20,7 @@ class PredictionType(str, enum.Enum):
     REGRESSION = "regression"
 
 
-class Prediction(Base):
+class Prediction(TenantBase, Base):
     """Prediction model"""
     __tablename__ = "predictions"
     

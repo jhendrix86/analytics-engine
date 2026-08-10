@@ -10,6 +10,7 @@ import uuid
 import enum
 
 from app.database import Base
+from app.models.tenant_base import TenantBase
 
 
 class ReportStatus(str, enum.Enum):
@@ -20,7 +21,7 @@ class ReportStatus(str, enum.Enum):
     FAILED = "failed"
 
 
-class Report(Base):
+class Report(TenantBase, Base):
     """Report model"""
     __tablename__ = "reports"
     

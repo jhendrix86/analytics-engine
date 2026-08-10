@@ -9,9 +9,10 @@ from datetime import datetime
 import uuid
 
 from app.database import Base
+from app.models.tenant_base import TenantBase
 
 
-class Dashboard(Base):
+class Dashboard(TenantBase, Base):
     """Dashboard model"""
     __tablename__ = "dashboards"
     
@@ -44,7 +45,7 @@ class Dashboard(Base):
         return f"<Dashboard {self.name}>"
 
 
-class Widget(Base):
+class Widget(TenantBase, Base):
     """Widget model"""
     __tablename__ = "widgets"
     

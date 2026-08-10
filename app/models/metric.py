@@ -10,6 +10,7 @@ import uuid
 import enum
 
 from app.database import Base
+from app.models.tenant_base import TenantBase
 
 
 class MetricType(str, enum.Enum):
@@ -22,7 +23,7 @@ class MetricType(str, enum.Enum):
     OPERATIONAL = "operational"
 
 
-class Metric(Base):
+class Metric(TenantBase, Base):
     """Metric model"""
     __tablename__ = "metrics"
     

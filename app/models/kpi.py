@@ -9,9 +9,10 @@ from datetime import datetime
 import uuid
 
 from app.database import Base
+from app.models.tenant_base import TenantBase
 
 
-class KPI(Base):
+class KPI(TenantBase, Base):
     """KPI model"""
     __tablename__ = "kpis"
     
@@ -45,7 +46,7 @@ class KPI(Base):
         return f"<KPI {self.name} - {self.current_value}/{self.target_value}>"
 
 
-class KPIGoal(Base):
+class KPIGoal(TenantBase, Base):
     """KPI goal model"""
     __tablename__ = "kpi_goals"
     
