@@ -29,8 +29,12 @@ class Metric(TenantBase, Base):
     
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     
-    # Metric details
-    name = Column(String(255), nullable=False, unique=True)
+    # Metric details - NOT unique: a metric is a time series, the same
+    # name legitimately gets a new row per observation. A global unique
+    # constraint here would make it impossible to ever record a second
+    # data point for the same metric - a real, blocking bug, found and
+    # fixed before this engine could work as a metrics store at all.
+    name = Column(String(255), nullable=False, index=True)
     metric_type = Column(Enum(MetricType), nullable=False)
     description = Column(String(500), nullable=True)
     

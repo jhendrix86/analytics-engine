@@ -3,7 +3,7 @@ Database models for Analytics Engine
 """
 
 from .tenant import Tenant
-from .tenant_base import TenantBase
+from .tenant_base import TenantBase, apply_tenant_context
 from .metric import Metric, MetricType
 from .dashboard import Dashboard, Widget
 from .report import Report, ReportStatus
@@ -13,6 +13,7 @@ from .kpi import KPI, KPIGoal
 __all__ = [
     'Tenant',
     'TenantBase',
+    'apply_tenant_context',
     'Metric',
     'MetricType',
     'Dashboard',

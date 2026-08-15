@@ -2,7 +2,7 @@
 Dashboard models
 """
 
-from sqlalchemy import Column, String, Integer, DateTime, Boolean, ForeignKey, JSON
+from sqlalchemy import Column, String, Integer, DateTime, Boolean, ForeignKey, JSON, UniqueConstraint
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 from datetime import datetime
@@ -15,11 +15,16 @@ from app.models.tenant_base import TenantBase
 class Dashboard(TenantBase, Base):
     """Dashboard model"""
     __tablename__ = "dashboards"
-    
+    __table_args__ = (
+        # Unique per-tenant, not globally - a global unique name would let
+        # one tenant block every other tenant from ever using "Sales Overview".
+        UniqueConstraint("tenant_id", "name", name="uq_dashboards_tenant_name"),
+    )
+
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    
+
     # Dashboard details
-    name = Column(String(255), nullable=False, unique=True)
+    name = Column(String(255), nullable=False)
     description = Column(String(500), nullable=True)
     
     # Layout

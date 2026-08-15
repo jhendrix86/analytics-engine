@@ -2,7 +2,7 @@
 KPI models
 """
 
-from sqlalchemy import Column, String, Integer, DateTime, Boolean, ForeignKey, JSON
+from sqlalchemy import Column, String, Integer, DateTime, Boolean, ForeignKey, JSON, UniqueConstraint
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 from datetime import datetime
@@ -15,11 +15,15 @@ from app.models.tenant_base import TenantBase
 class KPI(TenantBase, Base):
     """KPI model"""
     __tablename__ = "kpis"
-    
+    __table_args__ = (
+        # Unique per-tenant, not globally - same fix as Dashboard.name.
+        UniqueConstraint("tenant_id", "name", name="uq_kpis_tenant_name"),
+    )
+
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    
+
     # KPI details
-    name = Column(String(255), nullable=False, unique=True)
+    name = Column(String(255), nullable=False)
     description = Column(String(500), nullable=True)
     
     # Current value

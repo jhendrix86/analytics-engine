@@ -16,17 +16,20 @@ from app.models.report import Report, ReportStatus
 from app.models.prediction import Prediction, PredictionType
 
 
-async def test_metric_persists_and_is_unique_by_name(db_session):
-    metric = Metric(name="mrr", metric_type=MetricType.REVENUE, value=25000, unit="USD")
-    db_session.add(metric)
+async def test_metric_allows_multiple_observations_with_the_same_name(db_session):
+    """
+    A global unique constraint on Metric.name used to make it impossible
+    to ever record a second data point for the same metric - a real,
+    blocking bug for a time-series table, fixed this session (removed,
+    not just relaxed to per-tenant, since the same metric name legitimately
+    repeats across many timestamps for a single tenant too).
+    """
+    db_session.add(Metric(name="mrr", metric_type=MetricType.REVENUE, value=25000, unit="USD"))
+    db_session.add(Metric(name="mrr", metric_type=MetricType.REVENUE, value=26000, unit="USD"))
     await db_session.commit()
 
-    db_session.add(Metric(name="mrr", metric_type=MetricType.REVENUE, value=100))
-    try:
-        await db_session.commit()
-        assert False, "expected an IntegrityError for a duplicate metric name"
-    except IntegrityError:
-        await db_session.rollback()
+    result = await db_session.execute(select(Metric).where(Metric.name == "mrr"))
+    assert len(result.scalars().all()) == 2
 
 
 async def test_dashboard_widget_relationship_round_trips(db_session):
