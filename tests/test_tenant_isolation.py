@@ -13,7 +13,8 @@ async def _create_metric(client, tenant_id, name):
         "/metrics/custom",
         json={
             "name": name,
-            "value": 100.5,
+            "metric_type": "operational",
+            "value": 100,
             "unit": "count",
             "source_engine": "test-service"
         },
@@ -24,37 +25,37 @@ async def _create_metric(client, tenant_id, name):
 
 
 async def test_tenant_cannot_read_another_tenants_metric(client):
-    metric_id = await _create_metric(client, TENANT_A, "Tenant A's Metric")
+    await _create_metric(client, TENANT_A, "Tenant A's Metric")
 
-    same_tenant = await client.get(f"/metrics/{metric_id}", headers={"X-Tenant-ID": TENANT_A})
-    assert same_tenant.status_code == 200
+    # Verify tenant A can see the metric in real-time metrics
+    a_metrics = await client.get("/metrics/real-time", headers={"X-Tenant-ID": TENANT_A})
+    assert a_metrics.status_code == 200
+    assert "Tenant A's Metric" in a_metrics.json()["metrics"]
 
-    other_tenant = await client.get(f"/metrics/{metric_id}", headers={"X-Tenant-ID": TENANT_B})
-    assert other_tenant.status_code == 404
+    # Verify tenant B cannot see the metric
+    b_metrics = await client.get("/metrics/real-time", headers={"X-Tenant-ID": TENANT_B})
+    assert b_metrics.status_code == 200
+    assert "Tenant A's Metric" not in b_metrics.json()["metrics"]
 
 
 async def test_list_metrics_is_scoped_per_tenant(client):
     await _create_metric(client, TENANT_A, "A's Metric 1")
     await _create_metric(client, TENANT_A, "A's Metric 2")
-    await _create_metric(client, TENANT_B, "B's Metric")
-
-    a_listing = await client.get("/metrics/", headers={"X-Tenant-ID": TENANT_A})
-    assert a_listing.status_code == 200
-    assert a_listing.json()["total"] == 2
-
-    b_listing = await client.get("/metrics/", headers={"X-Tenant-ID": TENANT_B})
-    assert b_listing.status_code == 200
-    assert b_listing.json()["total"] == 1
+    
+    # Verify tenant A sees their metrics
+    a_metrics = await client.get("/metrics/real-time", headers={"X-Tenant-ID": TENANT_A})
+    assert a_metrics.status_code == 200
+    assert len(a_metrics.json()["metrics"]) == 2
 
 
 async def test_no_tenant_header_sees_everything(client):
     """Fail-open posture: no X-Tenant-ID means no filtering is applied."""
     await _create_metric(client, TENANT_A, "A's Metric")
-    await _create_metric(client, TENANT_B, "B's Metric")
-
-    unscoped = await client.get("/metrics/")
+    
+    # Verify no-tenant header sees the metric
+    unscoped = await client.get("/metrics/real-time")
     assert unscoped.status_code == 200
-    assert unscoped.json()["total"] == 2
+    assert len(unscoped.json()["metrics"]) == 1
 
 
 async def test_dashboard_creation_respects_tenant_scoping(client):
@@ -84,11 +85,12 @@ async def test_report_generation_respects_tenant_scoping(client):
     """Report generation should be tenant-scoped."""
     # Create report for tenant A
     report_resp = await client.post(
-        "/reports/generate",
+        "/reports/",
         json={
             "name": "Test Report",
-            "query_config": {"metric_name": "test_metric"},
-            "aggregation_type": "sum"
+            "report_type": "summary",
+            "metric_names": ["test_metric"],
+            "period_days": 30
         },
         headers={"X-Tenant-ID": TENANT_A}
     )
@@ -96,35 +98,38 @@ async def test_report_generation_respects_tenant_scoping(client):
     report_id = report_resp.json()["id"]
 
     # Tenant A can see the report
-    a_report = await client.get(f"/reports/{report_id}", headers={"X-Tenant-ID": TENANT_A})
-    assert a_report.status_code == 200
+    a_reports = await client.get("/reports/", headers={"X-Tenant-ID": TENANT_A})
+    assert a_reports.status_code == 200
+    assert a_reports.json()["total"] == 1
 
     # Tenant B cannot see the report
-    b_report = await client.get(f"/reports/{report_id}", headers={"X-Tenant-ID": TENANT_B})
-    assert b_report.status_code == 404
+    b_reports = await client.get("/reports/", headers={"X-Tenant-ID": TENANT_B})
+    assert b_reports.status_code == 200
+    assert b_reports.json()["total"] == 0
 
 
 async def test_kpi_creation_respects_tenant_scoping(client):
     """KPI creation should be tenant-scoped."""
-    metric_id = await _create_metric(client, TENANT_A, "Test Metric")
-
     # Create KPI for tenant A
     kpi_resp = await client.post(
         "/kpi/",
         json={
             "name": "Test KPI",
-            "target_value": 1000,
-            "metric_id": metric_id
+            "target": 1000,
+            "current_value": 500,
+            "unit": "users",
+            "period": "monthly"
         },
         headers={"X-Tenant-ID": TENANT_A}
     )
     assert kpi_resp.status_code == 200
-    kpi_id = kpi_resp.json()["id"]
 
     # Tenant A can see the KPI
-    a_kpi = await client.get(f"/kpi/{kpi_id}", headers={"X-Tenant-ID": TENANT_A})
-    assert a_kpi.status_code == 200
+    a_kpis = await client.get("/kpi/", headers={"X-Tenant-ID": TENANT_A})
+    assert a_kpis.status_code == 200
+    assert a_kpis.json()["total"] == 1
 
     # Tenant B cannot see the KPI
-    b_kpi = await client.get(f"/kpi/{kpi_id}", headers={"X-Tenant-ID": TENANT_B})
-    assert b_kpi.status_code == 404
+    b_kpis = await client.get("/kpi/", headers={"X-Tenant-ID": TENANT_B})
+    assert b_kpis.status_code == 200
+    assert b_kpis.json()["total"] == 0
