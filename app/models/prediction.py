@@ -3,7 +3,7 @@ Prediction models
 """
 
 from sqlalchemy import Column, String, Integer, DateTime, Enum, ForeignKey, JSON
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy import Uuid
 from datetime import datetime
 import uuid
 import enum
@@ -24,7 +24,7 @@ class Prediction(TenantBase, Base):
     """Prediction model"""
     __tablename__ = "predictions"
     
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    id = Column(Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4)
     
     # Prediction details
     name = Column(String(255), nullable=False)

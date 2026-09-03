@@ -3,7 +3,7 @@ Metric models
 """
 
 from sqlalchemy import Column, String, Integer, DateTime, Enum, ForeignKey, JSON
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy import Uuid
 from sqlalchemy.orm import relationship
 from datetime import datetime
 import uuid
@@ -27,7 +27,7 @@ class Metric(TenantBase, Base):
     """Metric model"""
     __tablename__ = "metrics"
     
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    id = Column(Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4)
     
     # Metric details - NOT unique: a metric is a time series, the same
     # name legitimately gets a new row per observation. A global unique

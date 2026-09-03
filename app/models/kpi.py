@@ -3,7 +3,7 @@ KPI models
 """
 
 from sqlalchemy import Column, String, Integer, DateTime, Boolean, ForeignKey, JSON, UniqueConstraint
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy import Uuid
 from sqlalchemy.orm import relationship
 from datetime import datetime
 import uuid
@@ -20,7 +20,7 @@ class KPI(TenantBase, Base):
         UniqueConstraint("tenant_id", "name", name="uq_kpis_tenant_name"),
     )
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    id = Column(Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4)
 
     # KPI details
     name = Column(String(255), nullable=False)
@@ -54,8 +54,8 @@ class KPIGoal(TenantBase, Base):
     """KPI goal model"""
     __tablename__ = "kpi_goals"
     
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    kpi_id = Column(UUID(as_uuid=True), ForeignKey("kpis.id"), nullable=False)
+    id = Column(Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    kpi_id = Column(Uuid(as_uuid=True), ForeignKey("kpis.id"), nullable=False)
     
     # Goal details
     target_value = Column(Integer, nullable=False)

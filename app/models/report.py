@@ -3,7 +3,7 @@ Report models
 """
 
 from sqlalchemy import Column, String, Integer, DateTime, Enum, ForeignKey, Text, JSON
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy import Uuid
 from sqlalchemy.orm import relationship
 from datetime import datetime
 import uuid
@@ -25,7 +25,7 @@ class Report(TenantBase, Base):
     """Report model"""
     __tablename__ = "reports"
     
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    id = Column(Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4)
     
     # Report details
     name = Column(String(255), nullable=False)

@@ -3,7 +3,7 @@ Dashboard models
 """
 
 from sqlalchemy import Column, String, Integer, DateTime, Boolean, ForeignKey, JSON, UniqueConstraint
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy import Uuid
 from sqlalchemy.orm import relationship
 from datetime import datetime
 import uuid
@@ -21,7 +21,7 @@ class Dashboard(TenantBase, Base):
         UniqueConstraint("tenant_id", "name", name="uq_dashboards_tenant_name"),
     )
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    id = Column(Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4)
 
     # Dashboard details
     name = Column(String(255), nullable=False)
@@ -54,8 +54,8 @@ class Widget(TenantBase, Base):
     """Widget model"""
     __tablename__ = "widgets"
     
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    dashboard_id = Column(UUID(as_uuid=True), ForeignKey("dashboards.id"), nullable=False)
+    id = Column(Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    dashboard_id = Column(Uuid(as_uuid=True), ForeignKey("dashboards.id"), nullable=False)
     
     # Widget details
     widget_type = Column(String(50), nullable=False)  # chart, metric, table, etc.
